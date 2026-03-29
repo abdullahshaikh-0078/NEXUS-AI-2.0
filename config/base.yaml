@@ -1,0 +1,13 @@
+app:
+  name: nexus-rag-platform
+  version: 0.1.0
+  env: development
+  host: 0.0.0.0
+  port: 8000
+
+logging:
+  level: INFO
+  json_logs: true
+
+openai:
+  api_key: ""

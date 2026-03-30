@@ -29,6 +29,15 @@ class OpenAIConfig(BaseModel):
     api_key: str = ""
 
 
+class IngestionConfig(BaseModel):
+    input_dir: str = "data/raw"
+    output_dir: str = "data/processed"
+    default_strategy: str = "structure_aware"
+    chunk_size: int = 900
+    chunk_overlap: int = 150
+    semantic_similarity_threshold: float = 0.18
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="RAG_",
@@ -41,6 +50,7 @@ class Settings(BaseSettings):
     app: AppConfig = Field(default_factory=AppConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     openai: OpenAIConfig = Field(default_factory=OpenAIConfig)
+    ingestion: IngestionConfig = Field(default_factory=IngestionConfig)
 
     @classmethod
     def from_yaml(cls, path: Path | None = None) -> Settings:

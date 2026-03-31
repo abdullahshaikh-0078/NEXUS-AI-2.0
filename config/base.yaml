@@ -19,3 +19,23 @@ ingestion:
   chunk_size: 900
   chunk_overlap: 150
   semantic_similarity_threshold: 0.18
+
+indexing:
+  input_chunk_file: data/processed/chunks.jsonl
+  output_dir: data/indexes
+  embedding_provider: sentence_transformers
+  embedding_fallback_provider: hash
+  embedding_model_name: BAAI/bge-small-en-v1.5
+  embedding_dimensions: 384
+  embedding_batch_size: 16
+  embedding_version: v1
+  dense_backend: faiss
+  dense_fallback_backend: native
+  dense_index_type: hnsw
+  dense_hnsw_m: 32
+  dense_hnsw_ef_construction: 80
+  sparse_backend: whoosh
+  sparse_fallback_backend: native
+  bm25_k1: 1.5
+  bm25_b: 0.75
+

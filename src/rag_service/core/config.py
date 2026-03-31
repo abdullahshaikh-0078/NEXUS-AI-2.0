@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
@@ -38,6 +38,26 @@ class IngestionConfig(BaseModel):
     semantic_similarity_threshold: float = 0.18
 
 
+class IndexingConfig(BaseModel):
+    input_chunk_file: str = "data/processed/chunks.jsonl"
+    output_dir: str = "data/indexes"
+    embedding_provider: str = "sentence_transformers"
+    embedding_fallback_provider: str = "hash"
+    embedding_model_name: str = "BAAI/bge-small-en-v1.5"
+    embedding_dimensions: int = 384
+    embedding_batch_size: int = 16
+    embedding_version: str = "v1"
+    dense_backend: str = "faiss"
+    dense_fallback_backend: str = "native"
+    dense_index_type: str = "hnsw"
+    dense_hnsw_m: int = 32
+    dense_hnsw_ef_construction: int = 80
+    sparse_backend: str = "whoosh"
+    sparse_fallback_backend: str = "native"
+    bm25_k1: float = 1.5
+    bm25_b: float = 0.75
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="RAG_",
@@ -51,6 +71,7 @@ class Settings(BaseSettings):
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     openai: OpenAIConfig = Field(default_factory=OpenAIConfig)
     ingestion: IngestionConfig = Field(default_factory=IngestionConfig)
+    indexing: IndexingConfig = Field(default_factory=IndexingConfig)
 
     @classmethod
     def from_yaml(cls, path: Path | None = None) -> Settings:

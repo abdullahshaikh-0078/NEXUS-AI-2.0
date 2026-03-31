@@ -1,17 +1,19 @@
-# NEXUS AI 2.0
+﻿# NEXUS AI 2.0
 
 Production-grade, modular Retrieval-Augmented Generation (RAG) system built in recruiter-friendly phases. Each phase is independently runnable, tested, and documented so the repository demonstrates both systems engineering discipline and applied ML platform design.
 
 ## Current Status
 
-Phase 1 is implemented:
+Phase 1, Phase 2, and Phase 3 are implemented:
 
-- Clean production repository structure
-- YAML + environment-based configuration
-- Structured logging with request lifecycle hooks
-- Async FastAPI application skeleton
-- Health endpoint
-- Test suite for core startup and config behavior
+- FastAPI service skeleton with health endpoint
+- YAML + environment configuration
+- Structured logging and lifecycle hooks
+- Offline ingestion pipeline for TXT, HTML, and PDF sources
+- Parsing, cleaning, adaptive chunking, and metadata enrichment
+- Batch embeddings with configurable BGE provider and deterministic fallback
+- Dense and sparse indexing with versioned artifacts, ID mapping, and manifests
+- Runnable ingestion and indexing CLIs with test coverage
 
 ## Repository Structure
 
@@ -21,23 +23,36 @@ Phase 1 is implemented:
 |   `-- base.yaml
 |-- docs/
 |   `-- phases/
-|       `-- phase-01.md
+|       |-- phase-01.md
+|       |-- phase-02.md
+|       `-- phase-03.md
 |-- scripts/
-|   `-- run_api.py
+|   |-- run_api.py
+|   |-- run_indexing.py
+|   `-- run_ingestion.py
 |-- src/
 |   `-- rag_service/
 |       |-- api/
-|       |   |-- routes/
-|       |   |   `-- health.py
-|       |   `-- app.py
 |       |-- core/
-|       |   |-- config.py
-|       |   |-- lifecycle.py
-|       |   `-- logging.py
+|       |-- indexing/
+|       |   |-- dense.py
+|       |   |-- embedders.py
+|       |   |-- loaders.py
+|       |   |-- models.py
+|       |   |-- pipeline.py
+|       |   `-- sparse.py
+|       |-- ingestion/
+|       |   |-- chunkers.py
+|       |   |-- cleaners.py
+|       |   |-- models.py
+|       |   |-- parsers.py
+|       |   `-- pipeline.py
 |       `-- main.py
 |-- tests/
 |   |-- conftest.py
-|   `-- test_health.py
+|   |-- test_health.py
+|   |-- test_indexing_pipeline.py
+|   `-- test_ingestion_pipeline.py
 |-- .env.example
 |-- .gitignore
 `-- pyproject.toml
@@ -49,8 +64,7 @@ Phase 1 is implemented:
 
 ```powershell
 python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -e .[dev]
+.\.venv\Scripts\python -m pip install -e .[dev]
 ```
 
 2. Copy environment defaults:
@@ -62,19 +76,25 @@ Copy-Item .env.example .env
 3. Run the API:
 
 ```powershell
-python scripts/run_api.py
+.\.venv\Scripts\python scripts/run_api.py
 ```
 
-4. Verify the service:
+4. Run offline ingestion:
 
 ```powershell
-Invoke-WebRequest http://127.0.0.1:8000/health
+.\.venv\Scripts\python scripts/run_ingestion.py --input-dir data/raw --output-file data/processed/chunks.jsonl --strategy structure_aware
 ```
 
-5. Run tests:
+5. Build embeddings and indexes:
 
 ```powershell
-pytest
+.\.venv\Scripts\python scripts/run_indexing.py --chunks-file data/processed/chunks.jsonl --version phase3-local --embedding-provider hash --dense-backend native --sparse-backend native
+```
+
+6. Run tests:
+
+```powershell
+.\.venv\Scripts\python -m pytest
 ```
 
 ## Configuration
@@ -89,23 +109,23 @@ Example overrides:
 ```powershell
 $env:RAG_APP__ENV="production"
 $env:RAG_LOGGING__LEVEL="DEBUG"
-python scripts/run_api.py
+$env:RAG_INGESTION__DEFAULT_STRATEGY="semantic"
+$env:RAG_INDEXING__EMBEDDING_PROVIDER="sentence_transformers"
+$env:RAG_INDEXING__DENSE_BACKEND="faiss"
+.\.venv\Scripts\python scripts/run_ingestion.py
+.\.venv\Scripts\python scripts/run_indexing.py
 ```
 
-## Phase 1 Deliverable
+## Phase Deliverables
 
-See [Phase 1 notes](docs/phases/phase-01.md) for:
-
-- code delivered
-- example usage
-- recommended commit message
-- what this phase demonstrates to recruiters
+- [Phase 1 notes](docs/phases/phase-01.md)
+- [Phase 2 notes](docs/phases/phase-02.md)
+- [Phase 3 notes](docs/phases/phase-03.md)
 
 ## Next Phases
 
-The structure is intentionally prepared for:
+The structure is now prepared for:
 
-- offline ingestion pipelines
-- retrieval and ranking services
-- evaluation workflows
-- production deployment and observability
+- hybrid retrieval orchestration
+- reranking and context construction
+- evaluation and production deployment layers

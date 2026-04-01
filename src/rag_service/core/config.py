@@ -27,6 +27,8 @@ class LoggingConfig(BaseModel):
 
 class OpenAIConfig(BaseModel):
     api_key: str = ""
+    model: str = "gpt-4.1-mini"
+    timeout_seconds: float = 10.0
 
 
 class IngestionConfig(BaseModel):
@@ -58,6 +60,16 @@ class IndexingConfig(BaseModel):
     bm25_b: float = 0.75
 
 
+class QueryConfig(BaseModel):
+    enable_expansion: bool = True
+    expansion_terms_per_token: int = 3
+    enable_rule_rewrite: bool = True
+    enable_llm_fallback: bool = True
+    llm_fallback_min_tokens: int = 4
+    max_expanded_terms: int = 12
+    preserve_original_case: bool = False
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="RAG_",
@@ -72,6 +84,7 @@ class Settings(BaseSettings):
     openai: OpenAIConfig = Field(default_factory=OpenAIConfig)
     ingestion: IngestionConfig = Field(default_factory=IngestionConfig)
     indexing: IndexingConfig = Field(default_factory=IndexingConfig)
+    query: QueryConfig = Field(default_factory=QueryConfig)
 
     @classmethod
     def from_yaml(cls, path: Path | None = None) -> Settings:

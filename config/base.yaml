@@ -1,4 +1,4 @@
-app:
+﻿app:
   name: nexus-rag-platform
   version: 0.1.0
   env: development
@@ -11,6 +11,8 @@ logging:
 
 openai:
   api_key: ""
+  model: gpt-4.1-mini
+  timeout_seconds: 10.0
 
 ingestion:
   input_dir: data/raw
@@ -39,3 +41,11 @@ indexing:
   bm25_k1: 1.5
   bm25_b: 0.75
 
+query:
+  enable_expansion: true
+  expansion_terms_per_token: 3
+  enable_rule_rewrite: true
+  enable_llm_fallback: true
+  llm_fallback_min_tokens: 4
+  max_expanded_terms: 12
+  preserve_original_case: false

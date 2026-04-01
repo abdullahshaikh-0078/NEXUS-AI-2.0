@@ -4,7 +4,7 @@ Production-grade, modular Retrieval-Augmented Generation (RAG) system built in r
 
 ## Current Status
 
-Phase 1 through Phase 5 are implemented:
+Phase 1 through Phase 6 are implemented:
 
 - FastAPI service skeleton with health endpoint
 - YAML + environment configuration
@@ -15,7 +15,8 @@ Phase 1 through Phase 5 are implemented:
 - Dense and sparse indexing with versioned artifacts, ID mapping, and manifests
 - Query cleaning, normalization, domain-aware expansion, and rewriting with optional OpenAI fallback
 - Hybrid retrieval with dense search, sparse search, candidate pooling, and reciprocal rank fusion
-- Runnable ingestion, indexing, query, and retrieval CLIs with test coverage
+- Modular reranking with cross-encoder support and a deterministic fallback scorer
+- Runnable ingestion, indexing, query, retrieval, and reranking CLIs with test coverage
 
 ## Repository Structure
 
@@ -29,13 +30,15 @@ Phase 1 through Phase 5 are implemented:
 |       |-- phase-02.md
 |       |-- phase-03.md
 |       |-- phase-04.md
-|       `-- phase-05.md
+|       |-- phase-05.md
+|       `-- phase-06.md
 |-- scripts/
 |   |-- run_api.py
 |   |-- run_indexing.py
 |   |-- run_ingestion.py
 |   |-- run_query_pipeline.py
-|   `-- run_retrieval_pipeline.py
+|   |-- run_retrieval_pipeline.py
+|   `-- run_reranking_pipeline.py
 |-- src/
 |   `-- rag_service/
 |       |-- api/
@@ -64,6 +67,10 @@ Phase 1 through Phase 5 are implemented:
 |       |   |-- loaders.py
 |       |   |-- models.py
 |       |   `-- pipeline.py
+|       |-- reranking/
+|       |   |-- models.py
+|       |   |-- pipeline.py
+|       |   `-- scorers.py
 |       `-- main.py
 |-- tests/
 |   |-- conftest.py
@@ -71,7 +78,8 @@ Phase 1 through Phase 5 are implemented:
 |   |-- test_indexing_pipeline.py
 |   |-- test_ingestion_pipeline.py
 |   |-- test_query_pipeline.py
-|   `-- test_retrieval_pipeline.py
+|   |-- test_retrieval_pipeline.py
+|   `-- test_reranking_pipeline.py
 |-- .env.example
 |-- .gitignore
 `-- pyproject.toml
@@ -122,7 +130,13 @@ Copy-Item .env.example .env
 .\.venv\Scripts\python scripts/run_retrieval_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
 ```
 
-8. Run tests:
+8. Run reranking:
+
+```powershell
+.\.venv\Scripts\python scripts/run_reranking_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+```
+
+9. Run tests:
 
 ```powershell
 .\.venv\Scripts\python -m pytest
@@ -145,10 +159,12 @@ $env:RAG_INDEXING__EMBEDDING_PROVIDER="sentence_transformers"
 $env:RAG_INDEXING__DENSE_BACKEND="faiss"
 $env:RAG_QUERY__ENABLE_LLM_FALLBACK="true"
 $env:RAG_RETRIEVAL__MANIFEST_PATH="data/indexes/v1/manifest.json"
+$env:RAG_RERANKING__PROVIDER="heuristic"
 .\.venv\Scripts\python scripts/run_ingestion.py
 .\.venv\Scripts\python scripts/run_indexing.py
 .\.venv\Scripts\python scripts/run_query_pipeline.py "hybrid retrieval latency"
 .\.venv\Scripts\python scripts/run_retrieval_pipeline.py "hybrid retrieval latency"
+.\.venv\Scripts\python scripts/run_reranking_pipeline.py "hybrid retrieval latency"
 ```
 
 ## Phase Deliverables
@@ -158,11 +174,12 @@ $env:RAG_RETRIEVAL__MANIFEST_PATH="data/indexes/v1/manifest.json"
 - [Phase 3 notes](docs/phases/phase-03.md)
 - [Phase 4 notes](docs/phases/phase-04.md)
 - [Phase 5 notes](docs/phases/phase-05.md)
+- [Phase 6 notes](docs/phases/phase-06.md)
 
 ## Next Phases
 
 The structure is now prepared for:
 
-- reranking and context construction
+- context construction and compression
 - answer generation and citation injection
 - evaluation and production deployment layers

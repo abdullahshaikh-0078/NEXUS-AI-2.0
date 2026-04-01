@@ -49,3 +49,11 @@ query:
   llm_fallback_min_tokens: 4
   max_expanded_terms: 12
   preserve_original_case: false
+
+retrieval:
+  manifest_path: data/indexes/v1/manifest.json
+  dense_top_k: 8
+  sparse_top_k: 8
+  fused_top_k: 10
+  candidate_pool_size: 12
+  rrf_k: 60

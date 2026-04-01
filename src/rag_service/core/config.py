@@ -70,6 +70,15 @@ class QueryConfig(BaseModel):
     preserve_original_case: bool = False
 
 
+class RetrievalConfig(BaseModel):
+    manifest_path: str = "data/indexes/v1/manifest.json"
+    dense_top_k: int = 8
+    sparse_top_k: int = 8
+    fused_top_k: int = 10
+    candidate_pool_size: int = 12
+    rrf_k: int = 60
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="RAG_",
@@ -85,6 +94,7 @@ class Settings(BaseSettings):
     ingestion: IngestionConfig = Field(default_factory=IngestionConfig)
     indexing: IndexingConfig = Field(default_factory=IndexingConfig)
     query: QueryConfig = Field(default_factory=QueryConfig)
+    retrieval: RetrievalConfig = Field(default_factory=RetrievalConfig)
 
     @classmethod
     def from_yaml(cls, path: Path | None = None) -> Settings:

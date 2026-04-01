@@ -79,6 +79,16 @@ class RetrievalConfig(BaseModel):
     rrf_k: int = 60
 
 
+class RerankingConfig(BaseModel):
+    provider: str = "cross_encoder"
+    fallback_provider: str = "heuristic"
+    model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    batch_size: int = 8
+    top_k: int = 5
+    candidate_limit: int = 10
+    normalize_scores: bool = True
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="RAG_",
@@ -95,6 +105,7 @@ class Settings(BaseSettings):
     indexing: IndexingConfig = Field(default_factory=IndexingConfig)
     query: QueryConfig = Field(default_factory=QueryConfig)
     retrieval: RetrievalConfig = Field(default_factory=RetrievalConfig)
+    reranking: RerankingConfig = Field(default_factory=RerankingConfig)
 
     @classmethod
     def from_yaml(cls, path: Path | None = None) -> Settings:

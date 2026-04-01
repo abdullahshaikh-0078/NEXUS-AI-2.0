@@ -57,3 +57,12 @@ retrieval:
   fused_top_k: 10
   candidate_pool_size: 12
   rrf_k: 60
+
+reranking:
+  provider: cross_encoder
+  fallback_provider: heuristic
+  model_name: cross-encoder/ms-marco-MiniLM-L-6-v2
+  batch_size: 8
+  top_k: 5
+  candidate_limit: 10
+  normalize_scores: true

@@ -66,3 +66,13 @@ reranking:
   top_k: 5
   candidate_limit: 10
   normalize_scores: true
+
+context:
+  max_context_tokens: 700
+  max_chunks: 4
+  min_rerank_score: 0.1
+  per_chunk_token_limit: 180
+  deduplicate_by_document: true
+  deduplicate_by_text: true
+  compression_strategy: extractive
+  include_metadata_headers: true

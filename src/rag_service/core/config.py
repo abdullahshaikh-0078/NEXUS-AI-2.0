@@ -89,6 +89,17 @@ class RerankingConfig(BaseModel):
     normalize_scores: bool = True
 
 
+class ContextConfig(BaseModel):
+    max_context_tokens: int = 700
+    max_chunks: int = 4
+    min_rerank_score: float = 0.1
+    per_chunk_token_limit: int = 180
+    deduplicate_by_document: bool = True
+    deduplicate_by_text: bool = True
+    compression_strategy: str = "extractive"
+    include_metadata_headers: bool = True
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="RAG_",
@@ -106,6 +117,7 @@ class Settings(BaseSettings):
     query: QueryConfig = Field(default_factory=QueryConfig)
     retrieval: RetrievalConfig = Field(default_factory=RetrievalConfig)
     reranking: RerankingConfig = Field(default_factory=RerankingConfig)
+    context: ContextConfig = Field(default_factory=ContextConfig)
 
     @classmethod
     def from_yaml(cls, path: Path | None = None) -> Settings:

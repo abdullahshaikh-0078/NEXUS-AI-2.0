@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXUS AI 2.0</title>
+    <meta
+      name="description"
+      content="Grounded retrieval website for NEXUS AI 2.0 with citations, debug evidence, and mock/live API support."
+    />
+    <link rel="stylesheet" href="./assets/css/main.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero-card">
+        <div>
+          <p class="eyebrow">NEXUS AI 2.0</p>
+          <h1>Grounded retrieval with visible evidence.</h1>
+          <p class="hero-copy">
+            Explore your RAG system through a browser-first chat website that keeps citations and retrieved
+            evidence in view.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button id="mode-toggle" class="ghost-button" type="button">Switch to live</button>
+          <button id="debug-toggle" class="ghost-button" type="button">Hide debug</button>
+          <span class="mode-pill">Mock mode</span>
+        </div>
+      </header>
+
+      <main class="workspace-grid">
+        <section class="chat-column">
+          <section class="panel chat-panel">
+            <div id="chat-history" class="chat-history" aria-live="polite"></div>
+            <div id="error-banner" class="error-banner is-hidden"></div>
+            <div id="loading-row" class="loading-row is-hidden">
+              <span class="spinner"></span>
+              <span>Waiting for response...</span>
+            </div>
+          </section>
+
+          <form id="composer-form" class="composer-panel">
+            <label class="sr-only" for="query-input">Ask a question</label>
+            <textarea
+              id="query-input"
+              name="query"
+              rows="3"
+              placeholder="Ask grounded questions about your corpus..."
+            ></textarea>
+            <button id="send-button" type="submit">Send</button>
+          </form>
+        </section>
+
+        <aside class="inspector-column">
+          <section class="panel answer-panel">
+            <div class="panel-heading">
+              <h2>Latest answer</h2>
+              <p>Markdown-rendered grounded response with traceable evidence.</p>
+            </div>
+            <div id="answer-metrics" class="answer-metrics empty-state">Response time: --</div>
+            <article id="answer-content" class="markdown-output empty-state">
+              Your latest answer will appear here.
+            </article>
+            <div id="inline-citations" class="inline-citations"></div>
+          </section>
+
+          <section class="panel citations-panel">
+            <div class="panel-heading">
+              <h2>Citations</h2>
+              <p>Click a citation to inspect the exact supporting chunk.</p>
+            </div>
+            <div id="citations-list" class="card-list empty-state">
+              Citations will appear with assistant responses.
+            </div>
+          </section>
+        </aside>
+      </main>
+
+      <section id="debug-panel" class="panel debug-panel">
+        <div class="panel-heading">
+          <h2>Retrieved documents</h2>
+          <p>Debug view showing the source chunk, document, and retrieval score.</p>
+        </div>
+        <div id="debug-list" class="card-list empty-state">
+          Submit a query to inspect the retrieved evidence.
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="./assets/js/app.js"></script>
+  </body>
+</html>

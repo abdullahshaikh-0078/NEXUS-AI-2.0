@@ -1,10 +1,10 @@
-﻿# NEXUS AI 2.0
+# NEXUS AI 2.0
 
 Production-grade, modular Retrieval-Augmented Generation (RAG) system built in recruiter-friendly phases. Each phase is independently runnable, tested, and documented so the repository demonstrates both systems engineering discipline and applied ML platform design.
 
 ## Current Status
 
-Phase 1 through Phase 7 are implemented:
+Phase 1 through Phase 8 are implemented, and the browser-based website scaffold is available with mocked responses:
 
 - FastAPI service skeleton with health endpoint
 - YAML + environment configuration
@@ -17,7 +17,9 @@ Phase 1 through Phase 7 are implemented:
 - Hybrid retrieval with dense search, sparse search, candidate pooling, and reciprocal rank fusion
 - Modular reranking with cross-encoder support and a deterministic fallback scorer
 - Context engineering with filtering, deduplication, token budgeting, and extractive compression
-- Runnable ingestion, indexing, query, retrieval, reranking, and context CLIs with test coverage
+- Grounded generation with prompt templates, inline citations, and OpenAI-to-heuristic fallback
+- Browser-based HTML, CSS, and JavaScript website with chat, markdown answers, citations, debug panel, and mocked API integration
+- Runnable ingestion, indexing, query, retrieval, reranking, context, and generation CLIs with test coverage
 
 ## Repository Structure
 
@@ -33,55 +35,48 @@ Phase 1 through Phase 7 are implemented:
 |       |-- phase-04.md
 |       |-- phase-05.md
 |       |-- phase-06.md
-|       `-- phase-07.md
+|       |-- phase-07.md
+|       `-- phase-08.md
+|-- frontend/
+|   |-- assets/
+|   |   |-- css/
+|   |   |   `-- main.css
+|   |   `-- js/
+|   |       |-- api.js
+|   |       |-- app.js
+|   |       |-- markdown.js
+|   |       |-- mock-data.js
+|   |       `-- ui.js
+|   `-- index.html
 |-- scripts/
 |   |-- run_api.py
+|   |-- run_context_pipeline.py
+|   |-- run_generation_pipeline.py
 |   |-- run_indexing.py
 |   |-- run_ingestion.py
 |   |-- run_query_pipeline.py
-|   |-- run_retrieval_pipeline.py
 |   |-- run_reranking_pipeline.py
-|   `-- run_context_pipeline.py
+|   `-- run_retrieval_pipeline.py
 |-- src/
 |   `-- rag_service/
 |       |-- api/
 |       |-- context/
-|       |   |-- compression.py
-|       |   |-- models.py
-|       |   `-- pipeline.py
 |       |-- core/
+|       |-- generation/
+|       |   |-- generators.py
+|       |   |-- models.py
+|       |   |-- pipeline.py
+|       |   `-- prompts.py
 |       |-- indexing/
-|       |   |-- dense.py
-|       |   |-- embedders.py
-|       |   |-- loaders.py
-|       |   |-- models.py
-|       |   |-- pipeline.py
-|       |   `-- sparse.py
 |       |-- ingestion/
-|       |   |-- chunkers.py
-|       |   |-- cleaners.py
-|       |   |-- models.py
-|       |   |-- parsers.py
-|       |   `-- pipeline.py
 |       |-- query/
-|       |   |-- cleaners.py
-|       |   |-- expanders.py
-|       |   |-- models.py
-|       |   |-- pipeline.py
-|       |   `-- rewriters.py
-|       |-- retrieval/
-|       |   |-- fusion.py
-|       |   |-- loaders.py
-|       |   |-- models.py
-|       |   `-- pipeline.py
 |       |-- reranking/
-|       |   |-- models.py
-|       |   |-- pipeline.py
-|       |   `-- scorers.py
+|       |-- retrieval/
 |       `-- main.py
 |-- tests/
 |   |-- conftest.py
 |   |-- test_context_pipeline.py
+|   |-- test_generation_pipeline.py
 |   |-- test_health.py
 |   |-- test_indexing_pipeline.py
 |   |-- test_ingestion_pipeline.py
@@ -93,7 +88,7 @@ Phase 1 through Phase 7 are implemented:
 `-- pyproject.toml
 ```
 
-## Quickstart
+## Backend Quickstart
 
 1. Create a virtual environment and install dependencies:
 
@@ -108,7 +103,7 @@ python -m venv .venv
 Copy-Item .env.example .env
 ```
 
-3. Run the API:
+3. Run the API skeleton:
 
 ```powershell
 .\.venv\Scripts\python scripts/run_api.py
@@ -150,11 +145,33 @@ Copy-Item .env.example .env
 .\.venv\Scripts\python scripts/run_context_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
 ```
 
-10. Run tests:
+10. Generate a grounded answer:
+
+```powershell
+.\.venv\Scripts\python scripts/run_generation_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+```
+
+11. Run tests:
 
 ```powershell
 .\.venv\Scripts\python -m pytest
 ```
+
+## Website Quickstart
+
+The website lives in `frontend/` as a plain HTML, CSS, and JavaScript frontend. It is intentionally decoupled from the backend until phase 10 adds the production `/query` endpoint.
+
+1. Open it with any static web server. For example, from the repository root:
+
+```powershell
+python -m http.server 5500
+```
+
+2. Open the site at `http://127.0.0.1:5500/frontend/`
+
+You can also use VS Code Live Server with `frontend/index.html`.
+
+The frontend currently runs against mocked responses by default. When phase 10 step 1 lands, update `frontend/assets/js/api.js` to switch from mock mode to the real backend URL.
 
 ## Configuration
 
@@ -175,12 +192,8 @@ $env:RAG_QUERY__ENABLE_LLM_FALLBACK="true"
 $env:RAG_RETRIEVAL__MANIFEST_PATH="data/indexes/v1/manifest.json"
 $env:RAG_RERANKING__PROVIDER="heuristic"
 $env:RAG_CONTEXT__MAX_CONTEXT_TOKENS="700"
-.\.venv\Scripts\python scripts/run_ingestion.py
-.\.venv\Scripts\python scripts/run_indexing.py
-.\.venv\Scripts\python scripts/run_query_pipeline.py "hybrid retrieval latency"
-.\.venv\Scripts\python scripts/run_retrieval_pipeline.py "hybrid retrieval latency"
-.\.venv\Scripts\python scripts/run_reranking_pipeline.py "hybrid retrieval latency"
-.\.venv\Scripts\python scripts/run_context_pipeline.py "hybrid retrieval latency"
+$env:RAG_GENERATION__PROVIDER="heuristic"
+.\.venv\Scripts\python scripts/run_generation_pipeline.py "hybrid retrieval latency"
 ```
 
 ## Phase Deliverables
@@ -192,10 +205,12 @@ $env:RAG_CONTEXT__MAX_CONTEXT_TOKENS="700"
 - [Phase 5 notes](docs/phases/phase-05.md)
 - [Phase 6 notes](docs/phases/phase-06.md)
 - [Phase 7 notes](docs/phases/phase-07.md)
+- [Phase 8 notes](docs/phases/phase-08.md)
 
 ## Next Phases
 
 The structure is now prepared for:
 
-- answer generation and citation injection
-- evaluation and production deployment layers
+- post-processing and confidence modeling
+- production `/query` API integration for the website
+- caching, monitoring, deployment, and evaluation layers

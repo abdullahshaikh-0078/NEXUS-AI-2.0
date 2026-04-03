@@ -1,4 +1,4 @@
-﻿app:
+app:
   name: nexus-rag-platform
   version: 0.1.0
   env: development
@@ -76,3 +76,10 @@ context:
   deduplicate_by_text: true
   compression_strategy: extractive
   include_metadata_headers: true
+
+generation:
+  provider: openai
+  fallback_provider: heuristic
+  temperature: 0.0
+  max_output_tokens: 400
+  max_citations: 4

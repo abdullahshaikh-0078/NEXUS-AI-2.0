@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
@@ -100,6 +100,14 @@ class ContextConfig(BaseModel):
     include_metadata_headers: bool = True
 
 
+class GenerationConfig(BaseModel):
+    provider: str = "openai"
+    fallback_provider: str = "heuristic"
+    temperature: float = 0.0
+    max_output_tokens: int = 400
+    max_citations: int = 4
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="RAG_",
@@ -118,6 +126,7 @@ class Settings(BaseSettings):
     retrieval: RetrievalConfig = Field(default_factory=RetrievalConfig)
     reranking: RerankingConfig = Field(default_factory=RerankingConfig)
     context: ContextConfig = Field(default_factory=ContextConfig)
+    generation: GenerationConfig = Field(default_factory=GenerationConfig)
 
     @classmethod
     def from_yaml(cls, path: Path | None = None) -> Settings:

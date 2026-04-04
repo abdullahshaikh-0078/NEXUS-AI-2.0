@@ -108,6 +108,17 @@ class GenerationConfig(BaseModel):
     max_citations: int = 4
 
 
+class PostProcessingConfig(BaseModel):
+    high_confidence_threshold: float = 0.8
+    medium_confidence_threshold: float = 0.55
+    target_citation_count: int = 3
+    target_context_blocks: int = 3
+    citation_score_weight: float = 0.55
+    citation_coverage_weight: float = 0.25
+    context_coverage_weight: float = 0.20
+    fallback_penalty: float = 0.12
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="RAG_",
@@ -127,6 +138,7 @@ class Settings(BaseSettings):
     reranking: RerankingConfig = Field(default_factory=RerankingConfig)
     context: ContextConfig = Field(default_factory=ContextConfig)
     generation: GenerationConfig = Field(default_factory=GenerationConfig)
+    postprocessing: PostProcessingConfig = Field(default_factory=PostProcessingConfig)
 
     @classmethod
     def from_yaml(cls, path: Path | None = None) -> Settings:

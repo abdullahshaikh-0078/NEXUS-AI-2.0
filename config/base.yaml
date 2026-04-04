@@ -83,3 +83,13 @@ generation:
   temperature: 0.0
   max_output_tokens: 400
   max_citations: 4
+
+postprocessing:
+  high_confidence_threshold: 0.8
+  medium_confidence_threshold: 0.55
+  target_citation_count: 3
+  target_context_blocks: 3
+  citation_score_weight: 0.55
+  citation_coverage_weight: 0.25
+  context_coverage_weight: 0.20
+  fallback_penalty: 0.12

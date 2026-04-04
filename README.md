@@ -4,7 +4,7 @@ Production-grade, modular Retrieval-Augmented Generation (RAG) system built in r
 
 ## Current Status
 
-Phase 1 through Phase 8 are implemented, and the browser-based website scaffold is available with mocked responses:
+Phase 1 through Phase 9 are implemented, and the browser-based website scaffold is available with mocked responses:
 
 - FastAPI service skeleton with health endpoint
 - YAML + environment configuration
@@ -18,8 +18,9 @@ Phase 1 through Phase 8 are implemented, and the browser-based website scaffold 
 - Modular reranking with cross-encoder support and a deterministic fallback scorer
 - Context engineering with filtering, deduplication, token budgeting, and extractive compression
 - Grounded generation with prompt templates, inline citations, and OpenAI-to-heuristic fallback
+- Structured post-processing with confidence scoring, citation formatting, and metadata packaging
 - Browser-based HTML, CSS, and JavaScript website with chat, markdown answers, citations, debug panel, and mocked API integration
-- Runnable ingestion, indexing, query, retrieval, reranking, context, and generation CLIs with test coverage
+- Runnable ingestion, indexing, query, retrieval, reranking, context, generation, and post-processing CLIs with test coverage
 
 ## Repository Structure
 
@@ -36,7 +37,8 @@ Phase 1 through Phase 8 are implemented, and the browser-based website scaffold 
 |       |-- phase-05.md
 |       |-- phase-06.md
 |       |-- phase-07.md
-|       `-- phase-08.md
+|       |-- phase-08.md
+|       `-- phase-09.md
 |-- frontend/
 |   |-- assets/
 |   |   |-- css/
@@ -54,6 +56,7 @@ Phase 1 through Phase 8 are implemented, and the browser-based website scaffold 
 |   |-- run_generation_pipeline.py
 |   |-- run_indexing.py
 |   |-- run_ingestion.py
+|   |-- run_postprocessing_pipeline.py
 |   |-- run_query_pipeline.py
 |   |-- run_reranking_pipeline.py
 |   `-- run_retrieval_pipeline.py
@@ -63,12 +66,13 @@ Phase 1 through Phase 8 are implemented, and the browser-based website scaffold 
 |       |-- context/
 |       |-- core/
 |       |-- generation/
-|       |   |-- generators.py
-|       |   |-- models.py
-|       |   |-- pipeline.py
-|       |   `-- prompts.py
 |       |-- indexing/
 |       |-- ingestion/
+|       |-- postprocessing/
+|       |   |-- formatters.py
+|       |   |-- models.py
+|       |   |-- pipeline.py
+|       |   `-- scoring.py
 |       |-- query/
 |       |-- reranking/
 |       |-- retrieval/
@@ -80,6 +84,7 @@ Phase 1 through Phase 8 are implemented, and the browser-based website scaffold 
 |   |-- test_health.py
 |   |-- test_indexing_pipeline.py
 |   |-- test_ingestion_pipeline.py
+|   |-- test_postprocessing_pipeline.py
 |   |-- test_query_pipeline.py
 |   |-- test_reranking_pipeline.py
 |   `-- test_retrieval_pipeline.py
@@ -151,7 +156,13 @@ Copy-Item .env.example .env
 .\.venv\Scripts\python scripts/run_generation_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
 ```
 
-11. Run tests:
+11. Run structured post-processing:
+
+```powershell
+.\.venv\Scripts\python scripts/run_postprocessing_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+```
+
+12. Run tests:
 
 ```powershell
 .\.venv\Scripts\python -m pytest
@@ -193,7 +204,8 @@ $env:RAG_RETRIEVAL__MANIFEST_PATH="data/indexes/v1/manifest.json"
 $env:RAG_RERANKING__PROVIDER="heuristic"
 $env:RAG_CONTEXT__MAX_CONTEXT_TOKENS="700"
 $env:RAG_GENERATION__PROVIDER="heuristic"
-.\.venv\Scripts\python scripts/run_generation_pipeline.py "hybrid retrieval latency"
+$env:RAG_POSTPROCESSING__HIGH_CONFIDENCE_THRESHOLD="0.8"
+.\.venv\Scripts\python scripts/run_postprocessing_pipeline.py "hybrid retrieval latency"
 ```
 
 ## Phase Deliverables
@@ -206,11 +218,12 @@ $env:RAG_GENERATION__PROVIDER="heuristic"
 - [Phase 6 notes](docs/phases/phase-06.md)
 - [Phase 7 notes](docs/phases/phase-07.md)
 - [Phase 8 notes](docs/phases/phase-08.md)
+- [Phase 9 notes](docs/phases/phase-09.md)
 
 ## Next Phases
 
 The structure is now prepared for:
 
-- post-processing and confidence modeling
 - production `/query` API integration for the website
-- caching, monitoring, deployment, and evaluation layers
+- async orchestration, caching, and monitoring
+- deployment, evaluation, and scaling layers

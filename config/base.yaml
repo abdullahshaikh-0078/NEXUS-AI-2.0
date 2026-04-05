@@ -5,6 +5,12 @@ app:
   host: 0.0.0.0
   port: 8000
 
+api:
+  prefix: /api/v1
+  cors_origins:
+    - "*"
+  request_timeout_seconds: 30.0
+
 logging:
   level: INFO
   json_logs: true
@@ -93,3 +99,14 @@ postprocessing:
   citation_coverage_weight: 0.25
   context_coverage_weight: 0.20
   fallback_penalty: 0.12
+
+cache:
+  provider: memory
+  redis_url: redis://redis:6379/0
+  default_ttl_seconds: 300
+  query_ttl_seconds: 180
+  retrieval_ttl_seconds: 120
+  embedding_ttl_seconds: 600
+
+monitoring:
+  enabled: true

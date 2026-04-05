@@ -4,7 +4,7 @@ Production-grade, modular Retrieval-Augmented Generation (RAG) system built in r
 
 ## Current Status
 
-Phase 1 through Phase 9 are implemented, and the browser-based website scaffold is available with mocked responses:
+Phase 1 through Phase 10 are implemented, and the browser-based website scaffold is ready to connect to the backend query API:
 
 - FastAPI service skeleton with health endpoint
 - YAML + environment configuration
@@ -19,8 +19,9 @@ Phase 1 through Phase 9 are implemented, and the browser-based website scaffold 
 - Context engineering with filtering, deduplication, token budgeting, and extractive compression
 - Grounded generation with prompt templates, inline citations, and OpenAI-to-heuristic fallback
 - Structured post-processing with confidence scoring, citation formatting, and metadata packaging
-- Browser-based HTML, CSS, and JavaScript website with chat, markdown answers, citations, debug panel, and mocked API integration
-- Runnable ingestion, indexing, query, retrieval, reranking, context, generation, and post-processing CLIs with test coverage
+- Production API layer with `POST /api/v1/query`, async retrieval orchestration, cache, metrics, and deployment assets
+- Browser-based HTML, CSS, and JavaScript website with chat, markdown answers, citations, debug panel, and mock/live API integration
+- Runnable ingestion, indexing, query, retrieval, reranking, context, generation, post-processing, and API tests
 
 ## Repository Structure
 
@@ -28,6 +29,10 @@ Phase 1 through Phase 9 are implemented, and the browser-based website scaffold 
 .
 |-- config/
 |   `-- base.yaml
+|-- deploy/
+|   `-- kubernetes/
+|       |-- deployment.yaml
+|       `-- service.yaml
 |-- docs/
 |   `-- phases/
 |       |-- phase-01.md
@@ -38,7 +43,8 @@ Phase 1 through Phase 9 are implemented, and the browser-based website scaffold 
 |       |-- phase-06.md
 |       |-- phase-07.md
 |       |-- phase-08.md
-|       `-- phase-09.md
+|       |-- phase-09.md
+|       `-- phase-10.md
 |-- frontend/
 |   |-- assets/
 |   |   |-- css/
@@ -63,19 +69,25 @@ Phase 1 through Phase 9 are implemented, and the browser-based website scaffold 
 |-- src/
 |   `-- rag_service/
 |       |-- api/
+|       |   |-- routes/
+|       |   |-- app.py
+|       |   `-- schemas.py
 |       |-- context/
 |       |-- core/
+|       |   |-- cache.py
+|       |   |-- config.py
+|       |   |-- lifecycle.py
+|       |   |-- logging.py
+|       |   `-- metrics.py
 |       |-- generation/
 |       |-- indexing/
 |       |-- ingestion/
 |       |-- postprocessing/
-|       |   |-- formatters.py
-|       |   |-- models.py
-|       |   |-- pipeline.py
-|       |   `-- scoring.py
 |       |-- query/
 |       |-- reranking/
 |       |-- retrieval/
+|       |-- services/
+|       |   `-- query_service.py
 |       `-- main.py
 |-- tests/
 |   |-- conftest.py
@@ -85,11 +97,15 @@ Phase 1 through Phase 9 are implemented, and the browser-based website scaffold 
 |   |-- test_indexing_pipeline.py
 |   |-- test_ingestion_pipeline.py
 |   |-- test_postprocessing_pipeline.py
+|   |-- test_query_api.py
 |   |-- test_query_pipeline.py
+|   |-- test_query_service.py
 |   |-- test_reranking_pipeline.py
 |   `-- test_retrieval_pipeline.py
 |-- .env.example
 |-- .gitignore
+|-- docker-compose.yml
+|-- Dockerfile
 `-- pyproject.toml
 ```
 
@@ -108,69 +124,48 @@ python -m venv .venv
 Copy-Item .env.example .env
 ```
 
-3. Run the API skeleton:
+3. Run the API:
 
 ```powershell
 .\.venv\Scripts\python scripts/run_api.py
 ```
 
-4. Run offline ingestion:
+4. Query the service:
 
 ```powershell
-.\.venv\Scripts\python scripts/run_ingestion.py --input-dir data/raw --output-file data/processed/chunks.jsonl --strategy structure_aware
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/query" -ContentType "application/json" -Body '{"query":"What is RAG?"}'
 ```
 
-5. Build embeddings and indexes:
+5. Inspect runtime metrics:
 
 ```powershell
-.\.venv\Scripts\python scripts/run_indexing.py --chunks-file data/processed/chunks.jsonl --version v1 --embedding-provider hash --dense-backend native --sparse-backend native
+Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8000/api/v1/metrics"
 ```
 
-6. Process a query before retrieval:
-
-```powershell
-.\.venv\Scripts\python scripts/run_query_pipeline.py "rag bm25 latency"
-```
-
-7. Run hybrid retrieval:
-
-```powershell
-.\.venv\Scripts\python scripts/run_retrieval_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
-```
-
-8. Run reranking:
-
-```powershell
-.\.venv\Scripts\python scripts/run_reranking_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
-```
-
-9. Build grounded context:
-
-```powershell
-.\.venv\Scripts\python scripts/run_context_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
-```
-
-10. Generate a grounded answer:
-
-```powershell
-.\.venv\Scripts\python scripts/run_generation_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
-```
-
-11. Run structured post-processing:
-
-```powershell
-.\.venv\Scripts\python scripts/run_postprocessing_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
-```
-
-12. Run tests:
+6. Run tests:
 
 ```powershell
 .\.venv\Scripts\python -m pytest
 ```
 
+## Pipeline CLIs
+
+The earlier phases remain independently runnable:
+
+```powershell
+.\.venv\Scripts\python scripts/run_ingestion.py --input-dir data/raw --output-file data/processed/chunks.jsonl --strategy structure_aware
+.\.venv\Scripts\python scripts/run_indexing.py --chunks-file data/processed/chunks.jsonl --version v1 --embedding-provider hash --dense-backend native --sparse-backend native
+.\.venv\Scripts\python scripts/run_query_pipeline.py "rag bm25 latency"
+.\.venv\Scripts\python scripts/run_retrieval_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+.\.venv\Scripts\python scripts/run_reranking_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+.\.venv\Scripts\python scripts/run_context_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+.\.venv\Scripts\python scripts/run_generation_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+.\.venv\Scripts\python scripts/run_postprocessing_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+```
+
 ## Website Quickstart
 
-The website lives in `frontend/` as a plain HTML, CSS, and JavaScript frontend. It is intentionally decoupled from the backend until phase 10 adds the production `/query` endpoint.
+The website lives in `frontend/` as a plain HTML, CSS, and JavaScript frontend.
 
 1. Open it with any static web server. For example, from the repository root:
 
@@ -180,9 +175,22 @@ python -m http.server 5500
 
 2. Open the site at `http://127.0.0.1:5500/frontend/`
 
-You can also use VS Code Live Server with `frontend/index.html`.
+3. Use the `Switch to live` control in the UI when the backend API is running.
 
-The frontend currently runs against mocked responses by default. When phase 10 step 1 lands, update `frontend/assets/js/api.js` to switch from mock mode to the real backend URL.
+The frontend currently supports both mocked responses and the real `/api/v1/query` endpoint.
+
+## Deployment
+
+Docker:
+
+```powershell
+docker compose up --build
+```
+
+Kubernetes manifests:
+
+- `deploy/kubernetes/deployment.yaml`
+- `deploy/kubernetes/service.yaml`
 
 ## Configuration
 
@@ -195,17 +203,12 @@ Example overrides:
 
 ```powershell
 $env:RAG_APP__ENV="production"
-$env:RAG_LOGGING__LEVEL="DEBUG"
-$env:RAG_INGESTION__DEFAULT_STRATEGY="semantic"
-$env:RAG_INDEXING__EMBEDDING_PROVIDER="sentence_transformers"
-$env:RAG_INDEXING__DENSE_BACKEND="faiss"
-$env:RAG_QUERY__ENABLE_LLM_FALLBACK="true"
+$env:RAG_CACHE__PROVIDER="redis"
+$env:RAG_CACHE__REDIS_URL="redis://localhost:6379/0"
 $env:RAG_RETRIEVAL__MANIFEST_PATH="data/indexes/v1/manifest.json"
-$env:RAG_RERANKING__PROVIDER="heuristic"
-$env:RAG_CONTEXT__MAX_CONTEXT_TOKENS="700"
 $env:RAG_GENERATION__PROVIDER="heuristic"
 $env:RAG_POSTPROCESSING__HIGH_CONFIDENCE_THRESHOLD="0.8"
-.\.venv\Scripts\python scripts/run_postprocessing_pipeline.py "hybrid retrieval latency"
+.\.venv\Scripts\python scripts/run_api.py
 ```
 
 ## Phase Deliverables
@@ -219,11 +222,12 @@ $env:RAG_POSTPROCESSING__HIGH_CONFIDENCE_THRESHOLD="0.8"
 - [Phase 7 notes](docs/phases/phase-07.md)
 - [Phase 8 notes](docs/phases/phase-08.md)
 - [Phase 9 notes](docs/phases/phase-09.md)
+- [Phase 10 notes](docs/phases/phase-10.md)
 
 ## Next Phases
 
 The structure is now prepared for:
 
-- production `/query` API integration for the website
-- async orchestration, caching, and monitoring
-- deployment, evaluation, and scaling layers
+- latency optimization and streaming responses
+- deeper scaling and failure-handling policies
+- evaluation, experimentation, and production hardening

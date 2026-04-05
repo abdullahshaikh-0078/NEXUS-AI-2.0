@@ -20,6 +20,12 @@ class AppConfig(BaseModel):
     port: int = 8000
 
 
+class ApiConfig(BaseModel):
+    prefix: str = "/api/v1"
+    cors_origins: list[str] = Field(default_factory=lambda: ["*"])
+    request_timeout_seconds: float = 30.0
+
+
 class LoggingConfig(BaseModel):
     level: str = "INFO"
     json_logs: bool = True
@@ -119,6 +125,19 @@ class PostProcessingConfig(BaseModel):
     fallback_penalty: float = 0.12
 
 
+class CacheConfig(BaseModel):
+    provider: str = "memory"
+    redis_url: str = "redis://redis:6379/0"
+    default_ttl_seconds: int = 300
+    query_ttl_seconds: int = 180
+    retrieval_ttl_seconds: int = 120
+    embedding_ttl_seconds: int = 600
+
+
+class MonitoringConfig(BaseModel):
+    enabled: bool = True
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="RAG_",
@@ -129,6 +148,7 @@ class Settings(BaseSettings):
     )
 
     app: AppConfig = Field(default_factory=AppConfig)
+    api: ApiConfig = Field(default_factory=ApiConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     openai: OpenAIConfig = Field(default_factory=OpenAIConfig)
     ingestion: IngestionConfig = Field(default_factory=IngestionConfig)
@@ -139,6 +159,8 @@ class Settings(BaseSettings):
     context: ContextConfig = Field(default_factory=ContextConfig)
     generation: GenerationConfig = Field(default_factory=GenerationConfig)
     postprocessing: PostProcessingConfig = Field(default_factory=PostProcessingConfig)
+    cache: CacheConfig = Field(default_factory=CacheConfig)
+    monitoring: MonitoringConfig = Field(default_factory=MonitoringConfig)
 
     @classmethod
     def from_yaml(cls, path: Path | None = None) -> Settings:

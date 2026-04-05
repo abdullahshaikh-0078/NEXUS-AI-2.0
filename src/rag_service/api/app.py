@@ -2,10 +2,14 @@ from __future__ import annotations
 
 from time import perf_counter
 
-from fastapi import FastAPI
-from starlette.requests import Request
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from rag_service.api.routes.health import router as health_router
+from rag_service.api.routes.metrics import router as metrics_router
+from rag_service.api.routes.query import router as query_router
 from rag_service.core.config import get_settings
 from rag_service.core.lifecycle import lifespan
 from rag_service.core.logging import configure_logging, get_logger
@@ -19,6 +23,14 @@ def create_app() -> FastAPI:
         title=settings.app.name,
         version=settings.app.version,
         lifespan=lifespan,
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.api.cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     logger = get_logger(__name__)
@@ -37,7 +49,33 @@ def create_app() -> FastAPI:
         )
         return response
 
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        logger.warning(
+            "request_validation_failed",
+            path=request.url.path,
+            errors=exc.errors(),
+        )
+        return JSONResponse(
+            status_code=422,
+            content={"detail": "Invalid request payload.", "errors": exc.errors()},
+        )
+
+    @app.exception_handler(Exception)
+    async def unhandled_exception_handler(request: Request, exc: Exception):
+        logger.exception(
+            "unhandled_request_exception",
+            path=request.url.path,
+            error=str(exc),
+        )
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error."},
+        )
+
     app.include_router(health_router)
+    app.include_router(query_router)
+    app.include_router(metrics_router)
 
     logger.info(
         "application_created",

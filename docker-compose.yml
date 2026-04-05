@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  rag-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexus-rag-api
+    environment:
+      RAG_APP__ENV: production
+      RAG_APP__HOST: 0.0.0.0
+      RAG_APP__PORT: 8000
+      RAG_CACHE__PROVIDER: redis
+      RAG_CACHE__REDIS_URL: redis://redis:6379/0
+      RAG_RETRIEVAL__MANIFEST_PATH: /app/data/indexes/v1/manifest.json
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    volumes:
+      - ./data:/app/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: nexus-rag-redis
+    ports:
+      - "6379:6379"

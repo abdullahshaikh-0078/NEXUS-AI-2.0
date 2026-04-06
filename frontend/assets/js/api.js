@@ -15,15 +15,17 @@ export async function queryRAG(query, options = {}) {
     return queryMockResponse(query, { onToken });
   }
 
+  if (typeof onToken === "function") {
+    return queryStreamingResponse(query, { onToken, timeoutMs });
+  }
+
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort("timeout"), timeoutMs);
 
   try {
     const response = await fetch(`${API_CONFIG.baseUrl}/query`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: buildHeaders(),
       body: JSON.stringify({ query }),
       signal: controller.signal,
     });
@@ -44,15 +46,7 @@ export async function queryRAG(query, options = {}) {
 
     return normalizePayload(payload);
   } catch (error) {
-    if (error?.name === "AbortError" || error === "timeout") {
-      throw new Error("The request timed out. Please try again.");
-    }
-
-    if (error instanceof TypeError) {
-      throw new Error("The API is unreachable right now. Make sure the backend is running.");
-    }
-
-    throw error;
+    throw normalizeError(error);
   } finally {
     window.clearTimeout(timeoutId);
   }
@@ -71,6 +65,69 @@ export function toggleApiMode() {
   return getApiMode();
 }
 
+async function queryStreamingResponse(query, options = {}) {
+  const { onToken, timeoutMs } = options;
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort("timeout"), timeoutMs);
+
+  try {
+    const response = await fetch(`${API_CONFIG.baseUrl}/query/stream`, {
+      method: "POST",
+      headers: buildHeaders(),
+      body: JSON.stringify({ query }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const payload = await parseResponse(response);
+      throw new Error(payload?.detail || payload?.message || "The streaming request failed.");
+    }
+
+    if (!response.body) {
+      throw new Error("Streaming is not available in this browser session.");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let finalPayload = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (!line.trim()) {
+          continue;
+        }
+        const event = JSON.parse(line);
+        if (event.type === "token") {
+          onToken(event.chunk || "");
+        }
+        if (event.type === "final") {
+          finalPayload = event.response;
+        }
+      }
+    }
+
+    if (!finalPayload || typeof finalPayload.answer !== "string") {
+      throw new Error("The RAG service returned an empty streamed response.");
+    }
+
+    return normalizePayload(finalPayload);
+  } catch (error) {
+    throw normalizeError(error);
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
 async function queryMockResponse(query, options = {}) {
   const { onToken } = options;
   const normalized = query.trim().toLowerCase();
@@ -78,10 +135,8 @@ async function queryMockResponse(query, options = {}) {
 
   if (typeof onToken === "function") {
     const chunks = chunkText(payload.answer, 48);
-    let assembled = "";
     for (const chunk of chunks) {
       await wait(45);
-      assembled += chunk;
       onToken(chunk);
     }
   } else {
@@ -101,12 +156,36 @@ async function parseResponse(response) {
   return text ? { message: text } : null;
 }
 
+function buildHeaders() {
+  const headers = {
+    "Content-Type": "application/json",
+  };
+  const apiKey = window.localStorage.getItem("rag-api-key");
+  if (apiKey) {
+    headers["x-api-key"] = apiKey;
+  }
+  return headers;
+}
+
 function normalizePayload(payload) {
   return {
     answer: payload.answer,
     citations: Array.isArray(payload.citations) ? payload.citations : [],
     latency_ms: Number.isFinite(payload.latency_ms) ? payload.latency_ms : 0,
+    warnings: Array.isArray(payload.warnings) ? payload.warnings : [],
   };
+}
+
+function normalizeError(error) {
+  if (error?.name === "AbortError" || error === "timeout") {
+    return new Error("The request timed out. Please try again.");
+  }
+
+  if (error instanceof TypeError) {
+    return new Error("The API is unreachable right now. Make sure the backend is running.");
+  }
+
+  return error;
 }
 
 function chunkText(value, chunkSize) {

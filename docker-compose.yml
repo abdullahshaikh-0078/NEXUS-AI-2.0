@@ -13,6 +13,11 @@ services:
       RAG_CACHE__PROVIDER: redis
       RAG_CACHE__REDIS_URL: redis://redis:6379/0
       RAG_RETRIEVAL__MANIFEST_PATH: /app/data/indexes/v1/manifest.json
+      RAG_SCALING__MAX_CONCURRENT_QUERIES: 12
+      RAG_SCALING__WORKER_PROCESSES: 2
+      RAG_RESILIENCE__ALLOW_PARTIAL_RETRIEVAL: "true"
+      RAG_SECURITY__REQUIRE_API_KEY: "false"
+      RAG_SECURITY__PROMPT_INJECTION_ACTION: sanitize
     ports:
       - "8000:8000"
     depends_on:

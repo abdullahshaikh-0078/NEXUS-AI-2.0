@@ -215,6 +215,21 @@ button {
   color: var(--muted);
 }
 
+.message-warnings {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.message-warning {
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 199, 107, 0.12);
+  border: 1px solid rgba(255, 199, 107, 0.28);
+  color: #ffe2a8;
+  font-size: 0.9rem;
+}
+
 .message-citations {
   display: flex;
   flex-wrap: wrap;

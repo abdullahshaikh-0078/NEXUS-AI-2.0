@@ -7,6 +7,7 @@ import pytest
 from rag_service.core.cache import InMemoryCache
 from rag_service.core.config import Settings
 from rag_service.core.metrics import MetricsRegistry
+from rag_service.core.scaling import QueryAdmissionController
 from rag_service.indexing.pipeline import build_indexes
 from rag_service.ingestion.pipeline import ingest_directory
 from rag_service.services.query_service import QueryService
@@ -78,6 +79,10 @@ async def test_query_service_returns_structured_response_and_cache_hits(
             "retrieval_ttl_seconds": 300,
             "embedding_ttl_seconds": 300,
         },
+        scaling={
+            "max_concurrent_queries": 2,
+            "acquire_timeout_seconds": 0.5,
+        },
     )
 
     chunks_path = tmp_path / "chunks.jsonl"
@@ -85,7 +90,12 @@ async def test_query_service_returns_structured_response_and_cache_hits(
     build_indexes(chunks_file=chunks_path, output_dir=tmp_path / "indexes", settings=settings)
 
     metrics = MetricsRegistry()
-    service = QueryService(settings=settings, cache_backend=InMemoryCache(), metrics=metrics)
+    service = QueryService(
+        settings=settings,
+        cache_backend=InMemoryCache(),
+        metrics=metrics,
+        admission_controller=QueryAdmissionController(2, 0.5),
+    )
 
     first_response = await service.answer("hybrid retrieval metadata")
     second_response = await service.answer("hybrid retrieval metadata")

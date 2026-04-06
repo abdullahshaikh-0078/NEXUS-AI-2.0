@@ -29,6 +29,21 @@ spec:
               value: redis
             - name: RAG_CACHE__REDIS_URL
               value: redis://nexus-rag-redis:6379/0
+            - name: RAG_SCALING__MAX_CONCURRENT_QUERIES
+              value: "16"
+            - name: RAG_SCALING__WORKER_PROCESSES
+              value: "2"
+            - name: RAG_RESILIENCE__ALLOW_PARTIAL_RETRIEVAL
+              value: "true"
+            - name: RAG_SECURITY__PROMPT_INJECTION_ACTION
+              value: sanitize
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
           readinessProbe:
             httpGet:
               path: /health

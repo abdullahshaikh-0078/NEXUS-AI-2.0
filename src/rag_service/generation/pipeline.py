@@ -15,17 +15,22 @@ def generate_grounded_answer(
     query: str,
     settings: Settings,
     context: ContextPackage | None = None,
+    *,
+    provider_override: str | None = None,
+    allow_fallback: bool = True,
 ) -> GroundedAnswer:
     context_package = context or build_context(query, settings=settings)
     citations = _build_citations(context_package, max_citations=settings.generation.max_citations)
     prompt = build_prompt_bundle(query=query, context=context_package, citations=citations, settings=settings)
 
-    generator = create_answer_generator(settings)
+    generator = create_answer_generator(settings, provider=provider_override)
     used_fallback = False
 
     try:
         answer = generator.generate(query=query, context=context_package, prompt=prompt, citations=citations)
     except Exception as exc:
+        if not allow_fallback:
+            raise
         fallback_provider = settings.generation.fallback_provider.lower()
         logger.warning(
             "generation_provider_failed",

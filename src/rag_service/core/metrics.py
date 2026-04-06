@@ -33,6 +33,7 @@ class QueryMetrics:
     confidence_total: float = 0.0
     citations_total: int = 0
     stage_metrics: dict[str, StageMetrics] = field(default_factory=dict)
+    events: dict[str, int] = field(default_factory=dict)
 
 
 class MetricsRegistry:
@@ -44,6 +45,10 @@ class MetricsRegistry:
         with self._lock:
             stage = self._metrics.stage_metrics.setdefault(stage_name, StageMetrics())
             stage.record(duration_ms)
+
+    def record_event(self, event_name: str) -> None:
+        with self._lock:
+            self._metrics.events[event_name] = self._metrics.events.get(event_name, 0) + 1
 
     def record_success(
         self,
@@ -91,6 +96,7 @@ class MetricsRegistry:
                 "average_latency_ms": average_latency_ms,
                 "average_confidence": average_confidence,
                 "average_citations": average_citations,
+                "events": dict(self._metrics.events),
                 "stage_metrics": {
                     name: {
                         "count": metrics.count,

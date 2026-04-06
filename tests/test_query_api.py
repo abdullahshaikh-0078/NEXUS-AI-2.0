@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 from rag_service.api.app import create_app
 from rag_service.api.schemas import QueryResponse
+from rag_service.core.config import Settings
 from rag_service.core.metrics import MetricsRegistry
 
 
@@ -39,8 +40,21 @@ class FakeQueryService:
                     "source_path": "data/raw/doc1.txt",
                 }
             ],
+            warnings=[],
             cache_hit=False,
         )
+
+    async def stream_answer(self, query: str):
+        yield {"type": "start", "cache_hit": False}
+        yield {"type": "token", "chunk": "Answer for "}
+        yield {"type": "token", "chunk": query}
+        yield {
+            "type": "final",
+            "response": (await self.answer(query)).model_dump(mode="json"),
+        }
+
+    def runtime_snapshot(self) -> dict[str, object]:
+        return {"circuits": {"dense": {"open": False}}}
 
 
 def test_query_endpoint_returns_structured_payload() -> None:
@@ -54,6 +68,18 @@ def test_query_endpoint_returns_structured_payload() -> None:
     assert payload["answer"] == "Answer for What is RAG?"
     assert payload["citations"][0]["source"] == "doc1.txt"
     assert payload["confidence_label"] == "high"
+
+
+def test_query_stream_endpoint_returns_ndjson() -> None:
+    app = create_app()
+    with TestClient(app) as client:
+        app.state.query_service = FakeQueryService()
+        response = client.post("/api/v1/query/stream", json={"query": "What is RAG?"})
+
+    assert response.status_code == 200
+    lines = [line for line in response.text.splitlines() if line.strip()]
+    assert '"type": "token"' in lines[1]
+    assert '"type": "final"' in lines[-1]
 
 
 def test_query_endpoint_rejects_invalid_payload() -> None:
@@ -76,9 +102,22 @@ def test_metrics_endpoint_returns_runtime_snapshot() -> None:
             citation_count=2,
             cache_hit=False,
         )
+        app.state.query_service = FakeQueryService()
         response = client.get("/api/v1/metrics")
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["total_requests"] == 1
     assert payload["stage_metrics"]["retrieval"]["count"] == 1
+    assert payload["runtime"]["circuits"]["dense"]["open"] is False
+
+
+def test_query_endpoint_requires_api_key_when_enabled() -> None:
+    app = create_app()
+    with TestClient(app) as client:
+        app.state.settings = Settings(security={"require_api_key": True, "api_keys": ["secret-key"]})
+        app.state.query_service = FakeQueryService()
+        response = client.post("/api/v1/query", json={"query": "What is RAG?"})
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "A valid API key is required for this endpoint."

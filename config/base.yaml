@@ -1,6 +1,6 @@
 app:
   name: nexus-rag-platform
-  version: 0.1.0
+  version: 0.15.0
   env: development
   host: 0.0.0.0
   port: 8000
@@ -110,3 +110,43 @@ cache:
 
 monitoring:
   enabled: true
+
+latency:
+  enable_adaptive_retrieval: true
+  short_query_token_threshold: 4
+  short_query_dense_top_k: 4
+  short_query_sparse_top_k: 4
+  short_query_candidate_pool_size: 6
+  short_query_fused_top_k: 6
+  stream_chunk_size: 80
+  stream_media_type: application/x-ndjson
+
+scaling:
+  max_concurrent_queries: 8
+  acquire_timeout_seconds: 1.5
+  worker_processes: 2
+  replica_hint: 2
+  enable_backpressure: true
+
+resilience:
+  retry_attempts: 2
+  retry_backoff_seconds: 0.2
+  dense_failure_threshold: 3
+  sparse_failure_threshold: 3
+  generation_failure_threshold: 3
+  circuit_reset_seconds: 30.0
+  allow_partial_retrieval: true
+
+cost:
+  skip_llm_for_high_confidence: true
+  confidence_rerank_threshold: 0.82
+  minimum_context_blocks_for_skip: 2
+  max_generation_context_blocks: 3
+  prefer_cached_answers: true
+
+security:
+  require_api_key: false
+  api_keys: []
+  prompt_injection_action: sanitize
+  max_query_characters: 2000
+  auth_header_name: x-api-key

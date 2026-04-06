@@ -37,6 +37,14 @@ export function renderChatHistory(container, messages, highlightedCitationId, on
       article.append(createElement("div", "message-latency", `Response time: ${message.latencyMs} ms`));
     }
 
+    if (message.warnings?.length) {
+      const warningList = createElement("div", "message-warnings");
+      message.warnings.forEach((warning) => {
+        warningList.append(createElement("div", "message-warning", warning));
+      });
+      article.append(warningList);
+    }
+
     if (message.citations?.length) {
       const strip = createElement("div", "message-citations");
       message.citations.forEach((citation, index) => {
@@ -131,10 +139,11 @@ export function renderDebugList(container, citations, highlightedCitationId, onC
   });
 }
 
-export function setResponseMetrics(element, latencyMs) {
+export function setResponseMetrics(element, latencyMs, warnings = []) {
   if (typeof latencyMs === "number") {
     element.classList.remove("empty-state");
-    element.textContent = `Response time: ${latencyMs} ms`;
+    const warningSuffix = warnings.length ? ` | warnings: ${warnings.length}` : "";
+    element.textContent = `Response time: ${latencyMs} ms${warningSuffix}`;
     return;
   }
 

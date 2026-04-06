@@ -14,8 +14,9 @@ const state = {
     createMessage({
       role: "assistant",
       content:
-        "Ask a question to explore your RAG system. This website is running on mocked responses right now, and it is structured to connect to `/query` after phase 10 step 1.",
+        "Ask a question to explore your RAG system. This website can use mocked data or the live `/api/v1/query` and `/api/v1/query/stream` endpoints.",
       citations: [],
+      warnings: [],
       latencyMs: 0,
       isStreaming: false,
     }),
@@ -60,6 +61,7 @@ function createMessage(partial) {
   return {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
+    warnings: [],
     ...partial,
   };
 }
@@ -91,7 +93,7 @@ async function handleSubmit(event) {
   state.pendingScrollCitationId = null;
   state.loading = true;
   state.messages.push(createMessage({ role: "user", content: query, isStreaming: false }));
-  state.messages.push(createMessage({ role: "assistant", content: "", citations: [], latencyMs: null, isStreaming: true }));
+  state.messages.push(createMessage({ role: "assistant", content: "", citations: [], warnings: [], latencyMs: null, isStreaming: true }));
   elements.queryInput.value = "";
   render();
 
@@ -140,6 +142,7 @@ function finalizeStreamingAnswer(response) {
     ...state.messages[assistantIndex],
     content: response.answer,
     citations: response.citations,
+    warnings: response.warnings,
     latencyMs: response.latency_ms,
     isStreaming: false,
   };
@@ -182,7 +185,7 @@ function render() {
   renderAnswer(elements.answerContent, latestAssistant?.content ?? "", citations, state.highlightedCitationId, handleCitationSelect, elements.inlineCitations);
   renderCitations(elements.citationsList, citations, state.highlightedCitationId, handleCitationSelect);
   renderDebugList(elements.debugList, citations, state.highlightedCitationId, handleCitationSelect);
-  setResponseMetrics(elements.answerMetrics, latestAssistant?.latencyMs);
+  setResponseMetrics(elements.answerMetrics, latestAssistant?.latencyMs, latestAssistant?.warnings ?? []);
   setError(elements.errorBanner, state.error);
   setLoading(elements.loadingRow, state.loading);
 

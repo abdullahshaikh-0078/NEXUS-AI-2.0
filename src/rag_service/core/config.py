@@ -138,6 +138,51 @@ class MonitoringConfig(BaseModel):
     enabled: bool = True
 
 
+class LatencyConfig(BaseModel):
+    enable_adaptive_retrieval: bool = True
+    short_query_token_threshold: int = 4
+    short_query_dense_top_k: int = 4
+    short_query_sparse_top_k: int = 4
+    short_query_candidate_pool_size: int = 6
+    short_query_fused_top_k: int = 6
+    stream_chunk_size: int = 80
+    stream_media_type: str = "application/x-ndjson"
+
+
+class ScalingConfig(BaseModel):
+    max_concurrent_queries: int = 8
+    acquire_timeout_seconds: float = 1.5
+    worker_processes: int = 2
+    replica_hint: int = 2
+    enable_backpressure: bool = True
+
+
+class ResilienceConfig(BaseModel):
+    retry_attempts: int = 2
+    retry_backoff_seconds: float = 0.2
+    dense_failure_threshold: int = 3
+    sparse_failure_threshold: int = 3
+    generation_failure_threshold: int = 3
+    circuit_reset_seconds: float = 30.0
+    allow_partial_retrieval: bool = True
+
+
+class CostConfig(BaseModel):
+    skip_llm_for_high_confidence: bool = True
+    confidence_rerank_threshold: float = 0.82
+    minimum_context_blocks_for_skip: int = 2
+    max_generation_context_blocks: int = 3
+    prefer_cached_answers: bool = True
+
+
+class SecurityConfig(BaseModel):
+    require_api_key: bool = False
+    api_keys: list[str] = Field(default_factory=list)
+    prompt_injection_action: str = "sanitize"
+    max_query_characters: int = 2000
+    auth_header_name: str = "x-api-key"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="RAG_",
@@ -161,6 +206,11 @@ class Settings(BaseSettings):
     postprocessing: PostProcessingConfig = Field(default_factory=PostProcessingConfig)
     cache: CacheConfig = Field(default_factory=CacheConfig)
     monitoring: MonitoringConfig = Field(default_factory=MonitoringConfig)
+    latency: LatencyConfig = Field(default_factory=LatencyConfig)
+    scaling: ScalingConfig = Field(default_factory=ScalingConfig)
+    resilience: ResilienceConfig = Field(default_factory=ResilienceConfig)
+    cost: CostConfig = Field(default_factory=CostConfig)
+    security: SecurityConfig = Field(default_factory=SecurityConfig)
 
     @classmethod
     def from_yaml(cls, path: Path | None = None) -> Settings:

@@ -37,4 +37,5 @@ class QueryResponse(BaseModel):
     references_markdown: str = ""
     stage_latencies_ms: dict[str, float] = Field(default_factory=dict)
     debug_documents: list[RetrievedDocument] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
     cache_hit: bool = False

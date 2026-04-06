@@ -1,15 +1,22 @@
 from __future__ import annotations
 
+import json
+
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
 
 from rag_service.api.schemas import QueryRequest, QueryResponse
+from rag_service.core.security import verify_api_key
 
 router = APIRouter(tags=["query"])
 
 
 @router.post("/query", response_model=QueryResponse, summary="Run the end-to-end RAG query pipeline")
 async def query_rag(request_body: QueryRequest, request: Request) -> QueryResponse:
+    settings = getattr(request.app.state, "settings", None)
+    if settings is not None:
+        verify_api_key(request, settings)
+
     query_service = getattr(request.app.state, "query_service", None)
     if query_service is None:
         raise HTTPException(

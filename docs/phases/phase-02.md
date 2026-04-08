@@ -15,7 +15,7 @@
 ## Example Usage
 
 ```powershell
-.\.venv\Scripts\python scripts/run_ingestion.py --input-dir data/raw --output-file data/processed/chunks.jsonl --strategy structure_aware
+.\.venv\Scripts\python backend/scripts/pipelines/run_ingestion.py --input-dir data/raw --output-file data/processed/chunks.jsonl --strategy structure_aware
 ```
 
 ## Recommended Commit Message
@@ -37,3 +37,5 @@ Phase 2 runs without retrieval dependencies and produces normalized chunk artifa
 
 - input: directory of raw `.txt`, `.html`, and `.pdf` files
 - output: JSONL file of chunk records with enriched metadata
+
+

@@ -11,9 +11,9 @@ Phase 13 hardens the online path against dependency failures:
 
 ## Key Files
 
-- `src/rag_service/core/resilience.py`
-- `src/rag_service/services/query_service.py`
-- `tests/test_failure_handling.py`
+- `backend/src/rag_service/core/resilience.py`
+- `backend/src/rag_service/services/query_service.py`
+- `backend/tests/test_failure_handling.py`
 
 ## Why It Matters
 
@@ -22,3 +22,5 @@ This phase shows production maturity: the system keeps serving useful answers un
 ## Suggested Commit Message
 
 `feat(phase-13): add retries circuit breakers and graceful retrieval degradation`
+
+

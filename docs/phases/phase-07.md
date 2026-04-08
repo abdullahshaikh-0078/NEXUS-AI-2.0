@@ -1,4 +1,4 @@
-﻿# Phase 7: Context Engineering
+# Phase 7: Context Engineering
 
 ## What This Phase Includes
 
@@ -13,7 +13,7 @@
 ## Example Usage
 
 ```powershell
-.\.venv\Scripts\python scripts/run_context_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+.\.venv\Scripts\python backend/scripts/pipelines/run_context_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
 ```
 
 ## Recommended Commit Message
@@ -35,3 +35,5 @@ Phase 7 consumes the reranked candidates from phase 6 and returns a bounded, com
 
 - input: raw user query plus phase 3 manifest path
 - output: selected context blocks, omitted candidates, token counts, and final prompt-ready context text
+
+

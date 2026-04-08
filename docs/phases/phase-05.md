@@ -1,4 +1,4 @@
-﻿# Phase 5: Hybrid Retrieval
+# Phase 5: Hybrid Retrieval
 
 ## What This Phase Includes
 
@@ -13,7 +13,7 @@
 ## Example Usage
 
 ```powershell
-.\.venv\Scripts\python scripts/run_retrieval_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+.\.venv\Scripts\python backend/scripts/pipelines/run_retrieval_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
 ```
 
 ## Recommended Commit Message
@@ -35,3 +35,5 @@ Phase 5 consumes the indexing manifest from phase 3 and a processed query from p
 
 - input: raw user query plus phase 3 manifest path
 - output: dense hits, sparse hits, and fused RRF candidates with chunk text and metadata
+
+

@@ -1,4 +1,4 @@
-﻿# Phase 3: Embeddings And Indexing
+# Phase 3: Embeddings And Indexing
 
 ## What This Phase Includes
 
@@ -13,7 +13,7 @@
 ## Example Usage
 
 ```powershell
-.\.venv\Scripts\python scripts/run_indexing.py --chunks-file data/processed/chunks.jsonl --version phase3-local --embedding-provider hash --dense-backend native --sparse-backend native
+.\.venv\Scripts\python backend/scripts/pipelines/run_indexing.py --chunks-file data/processed/chunks.jsonl --version phase3-local --embedding-provider hash --dense-backend native --sparse-backend native
 ```
 
 ## Recommended Commit Message
@@ -35,3 +35,5 @@ Phase 3 consumes the chunk artifact from phase 2 and produces versioned retrieva
 
 - input: JSONL chunk records from the ingestion pipeline
 - output: embeddings, dense index, sparse index, ID mapping, and manifest files under a versioned index directory
+
+

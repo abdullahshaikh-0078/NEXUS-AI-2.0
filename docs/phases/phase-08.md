@@ -12,7 +12,7 @@
 ## Example Usage
 
 ```powershell
-.\.venv\Scripts\python scripts/run_generation_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+.\.venv\Scripts\python backend/scripts/pipelines/run_generation_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
 ```
 
 ## Recommended Commit Message
@@ -34,3 +34,5 @@ Phase 8 consumes the grounded context produced in phase 7 and returns a grounded
 
 - input: raw user query plus phase 3 manifest path
 - output: prompt bundle, grounded markdown answer, inline citations, and selected evidence metadata
+
+

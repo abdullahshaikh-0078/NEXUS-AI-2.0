@@ -11,11 +11,11 @@ Phase 15 hardens the public API surface:
 
 ## Key Files
 
-- `src/rag_service/core/security.py`
-- `src/rag_service/core/exceptions.py`
-- `src/rag_service/api/app.py`
-- `src/rag_service/api/routes/query.py`
-- `tests/test_security_controls.py`
+- `backend/src/rag_service/core/security.py`
+- `backend/src/rag_service/core/exceptions.py`
+- `backend/src/rag_service/api/app.py`
+- `backend/src/rag_service/api/routes/query.py`
+- `backend/tests/test_security_controls.py`
 
 ## Why It Matters
 
@@ -24,3 +24,5 @@ This phase shows that the project is designed for hostile environments and real 
 ## Suggested Commit Message
 
 `feat(phase-15): add api authentication and prompt-injection defenses`
+
+

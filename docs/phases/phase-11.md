@@ -11,10 +11,10 @@ Phase 11 focuses on request latency without breaking correctness:
 
 ## Key Files
 
-- `src/rag_service/core/optimization.py`
-- `src/rag_service/services/query_service.py`
-- `src/rag_service/api/routes/query.py`
-- `tests/test_latency_optimization.py`
+- `backend/src/rag_service/core/optimization.py`
+- `backend/src/rag_service/services/query_service.py`
+- `backend/src/rag_service/api/routes/query.py`
+- `backend/tests/test_latency_optimization.py`
 
 ## Why It Matters
 
@@ -23,3 +23,5 @@ This phase shows that the system is not only accurate, but also engineered to re
 ## Suggested Commit Message
 
 `feat(phase-11): add adaptive retrieval planning and streaming-ready query responses`
+
+

@@ -1,4 +1,4 @@
-﻿# Phase 6: Reranking
+# Phase 6: Reranking
 
 ## What This Phase Includes
 
@@ -13,7 +13,7 @@
 ## Example Usage
 
 ```powershell
-.\.venv\Scripts\python scripts/run_reranking_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+.\.venv\Scripts\python backend/scripts/pipelines/run_reranking_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
 ```
 
 ## Recommended Commit Message
@@ -35,3 +35,5 @@ Phase 6 consumes the hybrid retrieval output from phase 5 and returns the final 
 
 - input: raw user query plus phase 3 manifest path
 - output: reranked candidate list with rerank score, retrieval provenance, and top-K selection
+
+

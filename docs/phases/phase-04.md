@@ -1,4 +1,4 @@
-﻿# Phase 4: Query Pipeline
+# Phase 4: Query Pipeline
 
 ## What This Phase Includes
 
@@ -13,7 +13,7 @@
 ## Example Usage
 
 ```powershell
-.\.venv\Scripts\python scripts/run_query_pipeline.py "rag bm25 latency"
+.\.venv\Scripts\python backend/scripts/pipelines/run_query_pipeline.py "rag bm25 latency"
 ```
 
 ## Recommended Commit Message
@@ -35,3 +35,5 @@ Phase 4 runs without retrieval execution and produces a structured processed-que
 
 - input: raw user query string
 - output: cleaned query, normalized query, expansions, rewrite strategy, and rewritten query
+
+

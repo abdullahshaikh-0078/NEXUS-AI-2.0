@@ -11,12 +11,12 @@ Phase 16B expands the evaluation system into an experimentation workflow:
 
 ## Key Files
 
-- `src/rag_service/evaluation/models.py`
-- `src/rag_service/evaluation/reporting.py`
+- `backend/src/rag_service/evaluation/models.py`
+- `backend/src/rag_service/evaluation/reporting.py`
 - `data/evaluation/README.md`
 - `data/evaluation/sample_eval_dataset.jsonl`
-- `config/base.yaml`
-- `.env.example`
+- `backend/config/base.yaml`
+- `backend/.env.example`
 
 ## Why It Matters
 
@@ -25,3 +25,5 @@ This phase makes the repository useful for interview storytelling and research d
 ## Suggested Commit Message
 
 `feat(phase-16b): add experiment tracking baseline comparisons and benchmark artifacts`
+
+

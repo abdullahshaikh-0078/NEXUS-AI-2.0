@@ -11,12 +11,12 @@ Phase 12 introduces scaling controls at runtime and deployment time:
 
 ## Key Files
 
-- `src/rag_service/core/scaling.py`
-- `src/rag_service/core/lifecycle.py`
-- `src/rag_service/main.py`
-- `deploy/kubernetes/deployment.yaml`
-- `deploy/kubernetes/hpa.yaml`
-- `tests/test_scaling_controls.py`
+- `backend/src/rag_service/core/scaling.py`
+- `backend/src/rag_service/core/lifecycle.py`
+- `backend/src/rag_service/main.py`
+- `backend/deploy/kubernetes/deployment.yaml`
+- `backend/deploy/kubernetes/hpa.yaml`
+- `backend/tests/test_scaling_controls.py`
 
 ## Why It Matters
 
@@ -25,3 +25,5 @@ This phase demonstrates that the service can be reasoned about under load, not o
 ## Suggested Commit Message
 
 `feat(phase-12): add admission control worker tuning and horizontal scaling assets`
+
+

@@ -11,9 +11,9 @@ Phase 14 reduces unnecessary model spend:
 
 ## Key Files
 
-- `src/rag_service/core/costing.py`
-- `src/rag_service/services/query_service.py`
-- `tests/test_cost_controls.py`
+- `backend/src/rag_service/core/costing.py`
+- `backend/src/rag_service/services/query_service.py`
+- `backend/tests/test_cost_controls.py`
 
 ## Why It Matters
 
@@ -22,3 +22,5 @@ This phase demonstrates awareness of real operating cost, not just model quality
 ## Suggested Commit Message
 
 `feat(phase-14): add confidence-aware llm skipping and context cost controls`
+
+

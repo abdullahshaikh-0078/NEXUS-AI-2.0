@@ -13,7 +13,7 @@
 
 ```powershell
 pip install -e .[dev]
-python scripts/run_api.py
+python backend/scripts/api/run_api.py
 pytest
 ```
 
@@ -38,4 +38,6 @@ Phase 1 runs as a standalone service and exposes:
 - OpenAPI docs via `/docs`
 
 This creates a stable platform for later phases without introducing retrieval dependencies prematurely.
+
+
 

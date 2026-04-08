@@ -11,7 +11,7 @@
 ## Example Usage
 
 ```powershell
-.\.venv\Scripts\python scripts/run_postprocessing_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
+.\.venv\Scripts\python backend/scripts/pipelines/run_postprocessing_pipeline.py "hybrid retrieval metadata" --manifest-path data/indexes/v1/manifest.json
 ```
 
 ## Recommended Commit Message
@@ -33,3 +33,5 @@ Phase 9 consumes the grounded answer from phase 8 and returns a structured respo
 
 - input: raw user query plus phase 3 manifest path
 - output: answer text, formatted citations, confidence assessment, references markdown, and response metadata
+
+

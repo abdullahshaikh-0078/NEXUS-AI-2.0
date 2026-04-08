@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus-rag-api
+spec:
+  type: ClusterIP
+  selector:
+    app: nexus-rag-api
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+      name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus-rag-redis
+spec:
+  type: ClusterIP
+  selector:
+    app: nexus-rag-redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+      protocol: TCP
+      name: redis

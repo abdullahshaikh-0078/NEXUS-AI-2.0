@@ -36,12 +36,12 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/rag_service"]
+packages = ["backend/src/rag_service"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = "-q"
-testpaths = ["tests"]
+testpaths = ["backend/tests"]
 asyncio_mode = "auto"
 
 [tool.ruff]

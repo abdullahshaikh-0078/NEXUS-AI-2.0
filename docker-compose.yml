@@ -4,7 +4,7 @@ services:
   rag-api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: backend/Dockerfile
     container_name: nexus-rag-api
     environment:
       RAG_APP__ENV: production

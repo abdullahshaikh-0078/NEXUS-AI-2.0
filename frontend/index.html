@@ -22,9 +22,17 @@
           </p>
         </div>
         <div class="hero-actions">
-          <button id="mode-toggle" class="ghost-button" type="button">Switch to live</button>
-          <button id="debug-toggle" class="ghost-button" type="button">Hide debug</button>
-          <span class="mode-pill">Mock mode</span>
+          <div class="hero-button-row">
+            <button id="mode-toggle" class="ghost-button" type="button">Switch to live</button>
+            <button id="debug-toggle" class="ghost-button" type="button">Hide debug</button>
+            <span class="mode-pill">Mock mode</span>
+          </div>
+          <div class="api-key-row">
+            <label class="sr-only" for="api-key-input">API key</label>
+            <input id="api-key-input" class="api-key-input" type="password" placeholder="Optional API key for live mode" />
+            <button id="api-key-save" class="ghost-button mini-button" type="button">Save key</button>
+            <button id="api-key-clear" class="ghost-button mini-button" type="button">Clear</button>
+          </div>
         </div>
       </header>
 
@@ -87,6 +95,7 @@
       </section>
     </div>
 
-    <script type="module" src="./assets/js/app.js"></script>
+    <script type="module" src="./assets/js/app/main.js"></script>
   </body>
 </html>
+

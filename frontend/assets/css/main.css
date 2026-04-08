@@ -492,3 +492,34 @@ button {
     width: 100%;
   }
 }
+.api-key-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.hero-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.api-key-input {
+  min-width: 260px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(158, 176, 199, 0.24);
+  background: rgba(11, 20, 35, 0.65);
+  color: #f3f6fb;
+}
+
+.api-key-input::placeholder {
+  color: rgba(158, 176, 199, 0.72);
+}
+
+.mini-button {
+  padding-inline: 14px;
+}

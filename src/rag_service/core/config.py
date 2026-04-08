@@ -183,6 +183,18 @@ class SecurityConfig(BaseModel):
     auth_header_name: str = "x-api-key"
 
 
+class EvaluationConfig(BaseModel):
+    dataset_path: str = "data/evaluation/generated_eval_dataset.jsonl"
+    output_dir: str = "artifacts/evaluation"
+    manifest_path: str = ""
+    systems: list[str] = Field(default_factory=lambda: ["bm25", "dense", "hybrid"])
+    baseline_system: str = "bm25"
+    k_values: list[int] = Field(default_factory=lambda: [3, 5, 10])
+    primary_k: int = 10
+    faithfulness_overlap_threshold: float = 0.35
+    generate_plots: bool = True
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="RAG_",
@@ -211,6 +223,7 @@ class Settings(BaseSettings):
     resilience: ResilienceConfig = Field(default_factory=ResilienceConfig)
     cost: CostConfig = Field(default_factory=CostConfig)
     security: SecurityConfig = Field(default_factory=SecurityConfig)
+    evaluation: EvaluationConfig = Field(default_factory=EvaluationConfig)
 
     @classmethod
     def from_yaml(cls, path: Path | None = None) -> Settings:

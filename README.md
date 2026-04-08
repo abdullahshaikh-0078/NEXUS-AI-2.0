@@ -4,23 +4,16 @@ Production-grade, modular Retrieval-Augmented Generation (RAG) system built in p
 
 ## Current Status
 
-Phase 1 through Phase 15 are implemented, and the browser-based website is prepared to consume both the standard and streaming query APIs:
+Phase 1 through Phase 16B are implemented. The project now covers the full RAG lifecycle from ingestion and indexing to online serving, security hardening, and reproducible benchmarking:
 
-- FastAPI service skeleton with health endpoint and lifecycle management
-- YAML + environment configuration with production-oriented phase controls
-- Structured logging, caching, metrics, and deployment assets
-- Offline ingestion for TXT, HTML, and PDF sources
-- Parsing, cleaning, adaptive chunking, metadata enrichment, and versioned indexing
-- Query cleaning, expansion, rewriting, hybrid retrieval, reranking, and context engineering
-- Grounded generation, structured post-processing, citations, and confidence scoring
-- Production API layer with `POST /api/v1/query`, `POST /api/v1/query/stream`, and `GET /api/v1/metrics`
-- Latency optimization with adaptive retrieval plans and streaming-ready chunk emission
-- Scaling controls with concurrency admission, multi-worker startup, and Kubernetes HPA manifests
-- Failure handling with retry logic, circuit breakers, retrieval degradation, and graceful fallback
-- Cost controls that trim generation context and skip expensive LLM calls when evidence is already strong
-- Security hardening with API-key auth, prompt-injection filtering, and response hardening headers
-- Browser-based HTML, CSS, and JavaScript website with chat, markdown answers, citations, debug panel, and mock/live API integration
-- Runnable unit and integration tests across retrieval, generation, API, and production concerns
+- FastAPI service with standard and streaming query endpoints
+- YAML + environment configuration with production-focused controls
+- Ingestion, chunking, metadata enrichment, embeddings, and indexing
+- Query processing, hybrid retrieval, reranking, context construction, and grounded generation
+- Structured post-processing with confidence scoring and citations
+- Caching, monitoring, scaling, resilience, cost controls, and API security
+- Browser-based website with mock/live mode, streaming-ready UX, citations, debug evidence, and API key support
+- Evaluation and experimentation pipeline comparing BM25, dense, and hybrid retrieval with Recall@K, MRR, NDCG, faithfulness, hallucination rate, latency breakdowns, JSON/CSV/Markdown/SVG artifacts, and baseline improvement tracking
 
 ## Repository Structure
 
@@ -28,6 +21,10 @@ Phase 1 through Phase 15 are implemented, and the browser-based website is prepa
 .
 |-- config/
 |   `-- base.yaml
+|-- data/
+|   `-- evaluation/
+|       |-- README.md
+|       `-- sample_eval_dataset.jsonl
 |-- deploy/
 |   `-- kubernetes/
 |       |-- deployment.yaml
@@ -49,7 +46,9 @@ Phase 1 through Phase 15 are implemented, and the browser-based website is prepa
 |       |-- phase-12.md
 |       |-- phase-13.md
 |       |-- phase-14.md
-|       `-- phase-15.md
+|       |-- phase-15.md
+|       |-- phase-16.md
+|       `-- phase-16b.md
 |-- frontend/
 |   |-- assets/
 |   |   |-- css/
@@ -62,8 +61,10 @@ Phase 1 through Phase 15 are implemented, and the browser-based website is prepa
 |   |       `-- ui.js
 |   `-- index.html
 |-- scripts/
+|   |-- generate_eval_dataset.py
 |   |-- run_api.py
 |   |-- run_context_pipeline.py
+|   |-- run_evaluation.py
 |   |-- run_generation_pipeline.py
 |   |-- run_indexing.py
 |   |-- run_ingestion.py
@@ -74,22 +75,9 @@ Phase 1 through Phase 15 are implemented, and the browser-based website is prepa
 |-- src/
 |   `-- rag_service/
 |       |-- api/
-|       |   |-- routes/
-|       |   |-- app.py
-|       |   `-- schemas.py
 |       |-- context/
 |       |-- core/
-|       |   |-- cache.py
-|       |   |-- config.py
-|       |   |-- costing.py
-|       |   |-- exceptions.py
-|       |   |-- lifecycle.py
-|       |   |-- logging.py
-|       |   |-- metrics.py
-|       |   |-- optimization.py
-|       |   |-- resilience.py
-|       |   |-- scaling.py
-|       |   `-- security.py
+|       |-- evaluation/
 |       |-- generation/
 |       |-- indexing/
 |       |-- ingestion/
@@ -98,12 +86,12 @@ Phase 1 through Phase 15 are implemented, and the browser-based website is prepa
 |       |-- reranking/
 |       |-- retrieval/
 |       |-- services/
-|       |   `-- query_service.py
 |       `-- main.py
 |-- tests/
-|   |-- conftest.py
 |   |-- test_context_pipeline.py
 |   |-- test_cost_controls.py
+|   |-- test_evaluation_metrics.py
+|   |-- test_evaluation_runner.py
 |   |-- test_failure_handling.py
 |   |-- test_generation_pipeline.py
 |   |-- test_health.py
@@ -164,11 +152,27 @@ Invoke-WebRequest -Method Post -Uri "http://127.0.0.1:8000/api/v1/query/stream" 
 Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8000/api/v1/metrics"
 ```
 
-7. Run tests:
+7. Run the full test suite:
 
 ```powershell
 .\.venv\Scripts\python -m pytest
 ```
+
+## Evaluation Quickstart
+
+1. Generate a starter evaluation dataset from your chunk file:
+
+```powershell
+.\.venv\Scripts\python scripts/generate_eval_dataset.py --chunks-file data/processed/chunks.jsonl --output-file data/evaluation/generated_eval_dataset.jsonl --max-documents 5
+```
+
+2. Run benchmark experiments:
+
+```powershell
+.\.venv\Scripts\python scripts/run_evaluation.py --dataset-path data/evaluation/generated_eval_dataset.jsonl --manifest-path data/indexes/v1/manifest.json --systems bm25 dense hybrid
+```
+
+3. Inspect the generated artifacts under `artifacts/evaluation/<timestamp>/`
 
 ## Website Quickstart
 
@@ -182,7 +186,9 @@ python -m http.server 5500
 
 2. Open the site at `http://127.0.0.1:5500/frontend/`
 
-3. Use the `Switch to live` control in the UI when the backend API is running.
+3. Use `Switch to live` when the backend is running.
+
+4. If API auth is enabled, enter your API key in the website header and save it before sending a live query.
 
 ## Deployment
 
@@ -211,10 +217,9 @@ Example overrides:
 $env:RAG_APP__ENV="production"
 $env:RAG_CACHE__PROVIDER="redis"
 $env:RAG_SCALING__MAX_CONCURRENT_QUERIES="16"
-$env:RAG_RESILIENCE__ALLOW_PARTIAL_RETRIEVAL="true"
-$env:RAG_COST__SKIP_LLM_FOR_HIGH_CONFIDENCE="true"
 $env:RAG_SECURITY__REQUIRE_API_KEY="true"
 $env:RAG_SECURITY__API_KEYS='["change-me"]'
+$env:RAG_EVALUATION__DATASET_PATH="data/evaluation/generated_eval_dataset.jsonl"
 .\.venv\Scripts\python scripts/run_api.py
 ```
 
@@ -235,11 +240,12 @@ $env:RAG_SECURITY__API_KEYS='["change-me"]'
 - [Phase 13 notes](docs/phases/phase-13.md)
 - [Phase 14 notes](docs/phases/phase-14.md)
 - [Phase 15 notes](docs/phases/phase-15.md)
+- [Phase 16 notes](docs/phases/phase-16.md)
+- [Phase 16B notes](docs/phases/phase-16b.md)
 
-## Next Phases
+## Final Notes
 
-The structure is now prepared for:
+The repository now has both the product-facing path and the research-facing path:
 
-- evaluation and experimentation pipelines
-- benchmark reporting and reproducibility artifacts
-- end-to-end UI connection to the live and streaming backend in production mode
+- product path: ingest -> index -> query API -> website demo
+- research path: dataset -> benchmark runner -> comparison table -> reproducible artifacts

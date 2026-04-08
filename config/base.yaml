@@ -1,6 +1,6 @@
 app:
   name: nexus-rag-platform
-  version: 0.15.0
+  version: 0.16.0
   env: development
   host: 0.0.0.0
   port: 8000
@@ -150,3 +150,20 @@ security:
   prompt_injection_action: sanitize
   max_query_characters: 2000
   auth_header_name: x-api-key
+
+evaluation:
+  dataset_path: data/evaluation/generated_eval_dataset.jsonl
+  output_dir: artifacts/evaluation
+  manifest_path: ""
+  systems:
+    - bm25
+    - dense
+    - hybrid
+  baseline_system: bm25
+  k_values:
+    - 3
+    - 5
+    - 10
+  primary_k: 10
+  faithfulness_overlap_threshold: 0.35
+  generate_plots: true
